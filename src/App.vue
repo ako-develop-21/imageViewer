@@ -1,30 +1,57 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+    <div class="grid-container">
+        <div
+            v-for="(image, index) in images"
+            :key="index"
+            class="grid-item"
+            :style="{
+                backgroundImage: `url(${image})`,
+                filter: brightness[index]
+                    ? 'brightness(100%)'
+                    : 'brightness(50%)',
+            }"
+            @click="toggleBrightness(index)"
+        ></div>
+    </div>
 </template>
 
+<script setup>
+import { ref, onBeforeMount } from "vue";
+
+const images = ref([]);
+const brightness = ref([]);
+
+// onBeforeMountのタイミングで画像パスをセット
+onBeforeMount(() => {
+    const loadedImages = [];
+    for (let i = 1; i <= 20; i++) {
+        const fileName = i.toString().padStart(2, "0") + ".png";
+        loadedImages.push(`/images/icon/${fileName}`);
+    }
+    images.value = loadedImages;
+    brightness.value = Array(loadedImages.length).fill(false);
+});
+
+function toggleBrightness(index) {
+    brightness.value[index] = !brightness.value[index];
+}
+</script>
+
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 192px);
+    grid-template-rows: repeat(2, 540px);
+    gap: 2px;
+    width: fit-content;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.grid-item {
+    width: 192px;
+    height: 540px;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    transition: filter 0.3s;
 }
 </style>
