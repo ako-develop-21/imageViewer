@@ -3,29 +3,37 @@
         <div
             v-for="(image, index) in images"
             :key="index"
-            class="image-item"
-            :class="{ active: isActive[index] }"
+            class="grid-item"
+            :style="{
+                backgroundImage: `url(${image})`,
+                filter: brightness[index]
+                    ? 'brightness(100%)'
+                    : 'brightness(50%)',
+            }"
             @click="toggleBrightness(index)"
-        >
-            <img :src="image" alt="Grid Image" />
-        </div>
+        ></div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
 
-// 画像パスを配列で初期化（1〜20の画像ファイル）
-const images = ref<string[]>(
-    Array.from({ length: 20 }, (_, i) => `/images/icon/${i + 1}.png`)
-);
+const images = ref<string[]>([]);
+const brightness = ref<boolean[]>([]);
 
-// 明度状態管理用の配列。初期値は全部false（=50%明度）
-const isActive = ref<boolean[]>(Array(20).fill(false));
+// onBeforeMountのタイミングで画像パスをセット
+onBeforeMount(() => {
+    const loadedImages = [];
+    for (let i = 1; i <= 20; i++) {
+        const fileName = i.toString().padStart(2, "0") + ".png";
+        loadedImages.push(`/images/icon/${fileName}`);
+    }
+    images.value = loadedImages;
+    brightness.value = Array(loadedImages.length).fill(false);
+});
 
-// クリックで状態をトグル
 function toggleBrightness(index: number) {
-    isActive.value[index] = !isActive.value[index];
+    brightness.value[index] = !brightness.value[index];
 }
 </script>
 
@@ -34,17 +42,16 @@ function toggleBrightness(index: number) {
     display: grid;
     grid-template-columns: repeat(10, 192px);
     grid-template-rows: repeat(2, 540px);
-    gap: 4px;
+    gap: 2px;
+    width: fit-content;
 }
-.image-item img {
+
+.grid-item {
     width: 192px;
     height: 540px;
-    object-fit: cover;
-    filter: brightness(50%);
-    transition: filter 0.3s;
+    background-size: cover;
+    background-position: center;
     cursor: pointer;
-}
-.image-item.active img {
-    filter: brightness(100%);
+    transition: filter 0.3s;
 }
 </style>
