@@ -4,36 +4,28 @@ name: Deploy to GitHub Pages
 on:
     push:
         branches:
-            - main # mainブランチ更新時に実行
+            - main # mainブランチが更新されたら実行
 
 jobs:
     deploy:
         runs-on: ubuntu-latest
-
         steps:
-            # 1. リポジトリをチェックアウト（完全履歴を取得）
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+            - name: Checkout code
+              uses: actions/checkout@v3
 
-            # 2. Node.js をセットアップ
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v3
               with:
                   node-version: 18
 
-            # 3. 依存関係をインストール
             - name: Install dependencies
               run: npm ci
 
-            # 4. ビルドを実行
-            - name: Build project
+            - name: Build the site
               run: npm run build
 
-            # 5. GitHub Pages へデプロイ
             - name: Deploy to GitHub Pages
-              uses: peaceiris/actions-gh-pages@v4
+              uses: peaceiris/actions-gh-pages@v3
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./dist # Viteのデフォルトビルド出力ディレクトリ
+                  publish_dir: ./dist
