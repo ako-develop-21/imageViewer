@@ -18,6 +18,8 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from "vue";
 
+const base = import.meta.env.BASE_URL;
+
 const images = ref<string[]>([]);
 const brightness = ref<boolean[]>([]);
 
@@ -26,7 +28,7 @@ onBeforeMount(() => {
     const loadedImages = [];
     for (let i = 1; i <= 20; i++) {
         const fileName = i.toString().padStart(2, "0") + ".png";
-        loadedImages.push(`/images/icon/${fileName}`);
+        loadedImages.push(`${base}images/icon/${fileName}`);
     }
     images.value = loadedImages;
     brightness.value = Array(loadedImages.length).fill(false);
