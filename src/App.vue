@@ -1,6 +1,5 @@
 <template>
     <div class="container">
-        <!-- 画像グリッド -->
         <ImageGrid></ImageGrid>
     </div>
 </template>
