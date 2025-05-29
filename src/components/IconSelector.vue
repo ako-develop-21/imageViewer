@@ -39,6 +39,9 @@ icons.value = Object.values(images);
 .icon {
     width: 50px;
     height: 50px;
+    border: 2px solid #cbcbcb;
+    border-radius: 50%;
+    box-sizing: border-box;
     cursor: pointer;
 }
 </style>

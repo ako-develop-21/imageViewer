@@ -22,23 +22,23 @@ const emit = defineEmits<{
 }>();
 
 // アイコンの最大10枚分の配置座標を定義
-const positions = [
-    { left: "10px", top: "300px" },
-    { left: "10px", top: "360px" },
-    { left: "10px", top: "420px" },
-    { left: "10px", top: "480px" },
-    { left: "10px", top: "540px" },
-    { left: "1220px", top: "300px" },
-    { left: "1220px", top: "360px" },
-    { left: "1220px", top: "420px" },
-    { left: "1220px", top: "480px" },
-    { left: "1220px", top: "540px" },
+const styles = [
+    { left: "10px", top: "300px", "border-color": "#A34DE5" },
+    { left: "10px", top: "360px", "border-color": "#A34DE5" },
+    { left: "10px", top: "420px", "border-color": "#A34DE5" },
+    { left: "10px", top: "480px", "border-color": "#A34DE5" },
+    { left: "10px", top: "540px", "border-color": "#A34DE5" },
+    { left: "1220px", top: "300px", "border-color": "#E5894D" },
+    { left: "1220px", top: "360px", "border-color": "#E5894D" },
+    { left: "1220px", top: "420px", "border-color": "#E5894D" },
+    { left: "1220px", top: "480px", "border-color": "#E5894D" },
+    { left: "1220px", top: "540px", "border-color": "#E5894D" },
 ];
 
 const iconStyles = computed(() =>
     props.selectedIcons.map((_, index) => {
-        const pos = positions[index] || { left: "0px", top: "0px" };
-        return { ...pos };
+        const style = styles[index] || { left: "0px", top: "0px" };
+        return { ...style };
     })
 );
 
@@ -54,6 +54,9 @@ function removeIcon(index: number) {
     position: absolute;
     width: 50px;
     height: 50px;
+    border: 2px solid;
+    border-radius: 50%;
+    box-sizing: border-box;
     cursor: pointer;
 }
 
