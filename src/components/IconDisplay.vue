@@ -1,20 +1,25 @@
 <template>
     <div>
-        <img
-            v-for="(icon, index) in selectedIcons"
-            :key="index"
-            :src="icon"
-            class="placed-icon"
-            :style="iconStyles[index]"
-        />
+        <transition-group name="fade" tag="div">
+            <img
+                v-for="(icon, index) in selectedIcons"
+                :key="icon + index"
+                :src="icon"
+                class="placed-icon"
+                :style="iconStyles[index]"
+                @click="removeIcon(index)"
+            />
+        </transition-group>
     </div>
 </template>
 
 <script setup lang="ts">
 import { computed, defineProps } from "vue";
 
-// propsとして選択されたアイコンのURL配列を受け取る
 const props = defineProps<{ selectedIcons: string[] }>();
+const emit = defineEmits<{
+    (e: "update:selectedIcons", value: string[]): void;
+}>();
 
 // アイコンの最大10枚分の配置座標を定義
 const positions = [
@@ -30,16 +35,18 @@ const positions = [
     { left: "1220px", top: "540px" },
 ];
 
-// computedで各アイコンに適用するスタイルを生成
 const iconStyles = computed(() =>
     props.selectedIcons.map((_, index) => {
-        // 10枚を超えた場合の安全処理
         const pos = positions[index] || { left: "0px", top: "0px" };
-        return {
-            ...pos,
-        };
+        return { ...pos };
     })
 );
+
+function removeIcon(index: number) {
+    const newIcons = [...props.selectedIcons];
+    newIcons.splice(index, 1);
+    emit("update:selectedIcons", newIcons);
+}
 </script>
 
 <style scoped lang="scss">
@@ -47,5 +54,15 @@ const iconStyles = computed(() =>
     position: absolute;
     width: 50px;
     height: 50px;
+    cursor: pointer;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>

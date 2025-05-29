@@ -31,9 +31,11 @@ icons.value = Object.values(images);
     top: 0;
     width: 100%;
     display: flex;
-    justify-content: start;
+    flex-wrap: wrap;
     gap: 10px;
+    max-width: calc((50px + 10px) * 20);
 }
+
 .icon {
     width: 50px;
     height: 50px;

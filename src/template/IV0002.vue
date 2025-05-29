@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <IconSelector @select="addIcon" />
-        <IconDisplay :selectedIcons="selectedIcons" />
+        <IconDisplay v-model:selectedIcons="selectedIcons" />
     </div>
 </template>
 
