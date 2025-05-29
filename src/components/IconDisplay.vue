@@ -19,15 +19,15 @@ const props = defineProps<{ selectedIcons: string[] }>();
 // アイコンの最大10枚分の配置座標を定義
 const positions = [
     { left: "10px", top: "300px" },
-    { left: "10px", top: "350px" },
-    { left: "10px", top: "400px" },
-    { left: "10px", top: "450px" },
-    { left: "10px", top: "500px" },
+    { left: "10px", top: "360px" },
+    { left: "10px", top: "420px" },
+    { left: "10px", top: "480px" },
+    { left: "10px", top: "540px" },
     { right: "10px", top: "300px" },
-    { right: "10px", top: "350px" },
-    { right: "10px", top: "400px" },
-    { right: "10px", top: "450px" },
-    { right: "10px", top: "500px" },
+    { right: "10px", top: "360px" },
+    { right: "10px", top: "420px" },
+    { right: "10px", top: "480px" },
+    { right: "10px", top: "540px" },
 ];
 
 // computedで各アイコンに適用するスタイルを生成
