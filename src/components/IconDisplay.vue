@@ -1,6 +1,6 @@
 <template>
     <div>
-        <transition-group name="fade" tag="div">
+        <transition-group name="fade-move" tag="div">
             <img
                 v-for="(icon, index) in selectedIcons"
                 :key="icon + index"
@@ -19,9 +19,9 @@ import { computed, defineProps } from "vue";
 const props = defineProps<{ selectedIcons: string[] }>();
 const emit = defineEmits<{
     (e: "update:selectedIcons", value: string[]): void;
+    (e: "deselect", value: string): void;
 }>();
 
-// アイコンの最大10枚分の配置座標を定義
 const styles = [
     { left: "10px", top: "300px", "border-color": "#A34DE5" },
     { left: "10px", top: "360px", "border-color": "#A34DE5" },
@@ -37,15 +37,20 @@ const styles = [
 
 const iconStyles = computed(() =>
     props.selectedIcons.map((_, index) => {
-        const style = styles[index] || { left: "0px", top: "0px" };
+        const style = styles[index] || {
+            left: "0px",
+            top: "0px",
+            "border-color": "#000000",
+        };
         return { ...style };
     })
 );
 
 function removeIcon(index: number) {
     const newIcons = [...props.selectedIcons];
-    newIcons.splice(index, 1);
-    emit("update:selectedIcons", newIcons);
+    const removedIcon = newIcons.splice(index, 1)[0];
+    // emit("update:selectedIcons", newIcons);
+    emit("deselect", removedIcon);
 }
 </script>
 
@@ -60,12 +65,13 @@ function removeIcon(index: number) {
     cursor: pointer;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s ease;
+.fade-move-enter-active,
+.fade-move-leave-active {
+    transition: all 0.2s ease;
 }
-.fade-enter-from,
-.fade-leave-to {
+.fade-move-enter-from,
+.fade-move-leave-to {
     opacity: 0;
+    transform: translateY(20px);
 }
 </style>
