@@ -49,7 +49,6 @@ const iconStyles = computed(() =>
 function removeIcon(index: number) {
     const newIcons = [...props.selectedIcons];
     const removedIcon = newIcons.splice(index, 1)[0];
-    // emit("update:selectedIcons", newIcons);
     emit("deselect", removedIcon);
 }
 </script>
