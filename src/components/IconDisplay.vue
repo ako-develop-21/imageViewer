@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <transition-group name="fade-move" tag="div">
+    <div class="display-area">
+        <transition-group name="fade-move" tag="div" class="image-area">
             <img
                 v-for="(icon, index) in selectedIcons"
                 :key="icon + index"
@@ -23,16 +23,16 @@ const emit = defineEmits<{
 }>();
 
 const styles = [
-    { left: "10px", top: "300px", "border-color": "#A34DE5" },
-    { left: "10px", top: "360px", "border-color": "#A34DE5" },
-    { left: "10px", top: "420px", "border-color": "#A34DE5" },
-    { left: "10px", top: "480px", "border-color": "#A34DE5" },
-    { left: "10px", top: "540px", "border-color": "#A34DE5" },
-    { left: "1220px", top: "300px", "border-color": "#E5894D" },
-    { left: "1220px", top: "360px", "border-color": "#E5894D" },
-    { left: "1220px", top: "420px", "border-color": "#E5894D" },
-    { left: "1220px", top: "480px", "border-color": "#E5894D" },
-    { left: "1220px", top: "540px", "border-color": "#E5894D" },
+    { left: "0px", top: "0px", "border-color": "#A34DE5" },
+    { left: "0px", top: "70px", "border-color": "#A34DE5" },
+    { left: "0px", top: "140px", "border-color": "#A34DE5" },
+    { left: "0px", top: "210px", "border-color": "#A34DE5" },
+    { left: "0px", top: "280px", "border-color": "#A34DE5" },
+    { left: "1234px", top: "0px", "border-color": "#E5894D" },
+    { left: "1234px", top: "70px", "border-color": "#E5894D" },
+    { left: "1234px", top: "140px", "border-color": "#E5894D" },
+    { left: "1234px", top: "210px", "border-color": "#E5894D" },
+    { left: "1234px", top: "280px", "border-color": "#E5894D" },
 ];
 
 const iconStyles = computed(() =>
@@ -54,14 +54,28 @@ function removeIcon(index: number) {
 </script>
 
 <style scoped lang="scss">
-.placed-icon {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    border: 2px solid;
-    border-radius: 50%;
-    box-sizing: border-box;
-    cursor: pointer;
+.display-area {
+    width: 100%;
+    height: 100%;
+    // background-image: url("/images/bg/bgSample.png");
+
+    .image-area {
+        position: absolute;
+        width: 100%;
+        height: 470px;
+        top: 300px;
+    }
+
+    .placed-icon {
+        position: absolute;
+        width: 46px;
+        height: 46px;
+        border: 2px solid;
+        border-radius: 50%;
+        box-sizing: border-box;
+        cursor: pointer;
+        z-index: 2;
+    }
 }
 
 .fade-move-enter-active,

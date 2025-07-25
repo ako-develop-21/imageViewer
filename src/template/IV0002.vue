@@ -1,13 +1,15 @@
 <template>
     <div class="container">
+        <IconDisplay
+            class="icon-display"
+            v-model:selectedIcons="selectedIcons"
+            @deselect="(icon) => removeIcon(icon)"
+        />
         <IconSelector
+            class="icon-selector"
             ref="iconSelectorRef"
             @select="addIcon"
             @deselect="removeIcon"
-        />
-        <IconDisplay
-            v-model:selectedIcons="selectedIcons"
-            @deselect="(icon) => removeIcon(icon)"
         />
     </div>
 </template>
@@ -47,9 +49,25 @@ function removeIcon(icon: string) {
 <style scoped>
 .container {
     position: relative;
-    width: 100vw;
-    height: 100vh;
-    background-color: transparent;
+    width: 100%;
+    height: 100%;
+    /* background-color: transparent; */
     overflow: hidden;
+    /* background-color: rgba(48, 48, 48, 0.2); */
+
+    .icon-selector {
+        position: absolute;
+        width: 100%;
+        z-index: 1;
+    }
+
+    .icon-display {
+        position: absolute;
+        /* top: 200px; */
+        width: 100%;
+        height: 720px;
+        /* background-color: rgba(0, 0, 128, 0.1); */
+        z-index: 0;
+    }
 }
 </style>
