@@ -28,11 +28,11 @@ const styles = [
     { left: "0px", top: "140px", "border-color": "#A34DE5" },
     { left: "0px", top: "210px", "border-color": "#A34DE5" },
     { left: "0px", top: "280px", "border-color": "#A34DE5" },
-    { left: "1234px", top: "0px", "border-color": "#E5894D" },
-    { left: "1234px", top: "70px", "border-color": "#E5894D" },
-    { left: "1234px", top: "140px", "border-color": "#E5894D" },
-    { left: "1234px", top: "210px", "border-color": "#E5894D" },
-    { left: "1234px", top: "280px", "border-color": "#E5894D" },
+    { right: "0px", top: "0px", "border-color": "#E5894D" },
+    { right: "0px", top: "70px", "border-color": "#E5894D" },
+    { right: "0px", top: "140px", "border-color": "#E5894D" },
+    { right: "0px", top: "210px", "border-color": "#E5894D" },
+    { right: "0px", top: "280px", "border-color": "#E5894D" },
 ];
 
 const iconStyles = computed(() =>

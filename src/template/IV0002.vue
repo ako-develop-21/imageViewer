@@ -51,9 +51,6 @@ function removeIcon(icon: string) {
     position: relative;
     width: 100%;
     height: 100%;
-    /* background-color: transparent; */
-    overflow: hidden;
-    /* background-color: rgba(48, 48, 48, 0.2); */
 
     .icon-selector {
         position: absolute;
@@ -63,10 +60,8 @@ function removeIcon(icon: string) {
 
     .icon-display {
         position: absolute;
-        /* top: 200px; */
         width: 100%;
         height: 720px;
-        /* background-color: rgba(0, 0, 128, 0.1); */
         z-index: 0;
     }
 }
