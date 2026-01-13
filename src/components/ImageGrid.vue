@@ -28,7 +28,11 @@ onBeforeMount(() => {
     const loadedImages = [];
     for (let i = 1; i <= 20; i++) {
         const fileName = i.toString().padStart(2, "0") + ".png";
-        loadedImages.push(`${base}/images/card/${fileName}`);
+        const imgUrl = new URL(
+            `../assets/images/card/${fileName}`,
+            import.meta.url
+        ).href;
+        loadedImages.push(imgUrl);
     }
     images.value = loadedImages;
     brightness.value = Array(loadedImages.length).fill(false);

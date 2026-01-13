@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { ref, defineExpose } from "vue";
+import { ref } from "vue";
 
 const emit = defineEmits<{
     (e: "select", value: string): void;
@@ -30,7 +30,7 @@ const emit = defineEmits<{
 }>();
 
 /** 元画像一覧 */
-const images = import.meta.glob("/public/images/icon/*.png", {
+const images = import.meta.glob("@/assets/images/icon/*.png", {
     eager: true,
     as: "url",
 });
@@ -128,9 +128,38 @@ defineExpose({ deselect });
     }
 
     .reset-button {
-        height: 40px;
-        margin-top: 7px;
-        margin-left: 10px;
+        height: 38px;
+        margin-top: 8px;
+        margin-left: 15px;
+        padding: 0 20px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #efefef;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+
+        &:hover {
+            background: linear-gradient(135deg, #3d3d3d 0%, #252525 100%);
+            border-color: rgba(255, 69, 58, 0.6);
+            color: #ff6b6b;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4),
+                0 0 10px rgba(255, 69, 58, 0.2);
+        }
+
+        &:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
     }
 }
 </style>

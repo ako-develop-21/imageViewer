@@ -1,90 +1,139 @@
 <template>
-    <div class="display-area">
-        <transition-group name="fade-move" tag="div" class="image-area">
-            <img
-                v-for="(icon, index) in selectedIcons"
-                :key="icon + index"
-                :src="icon"
-                class="placed-icon"
-                :style="iconStyles[index]"
-                @click="removeIcon(index)"
-            />
-        </transition-group>
+    <div class="display-area" :class="{ 'with-bg': config.showBackground }">
+        <div class="image-area">
+            <TransitionGroup name="icon-list">
+                <div
+                    v-for="(icon, index) in selectedIcons"
+                    :key="icon + index"
+                    class="icon-wrapper"
+                    :style="iconStyles[index]"
+                    @click="emit('deselect', icon)"
+                >
+                    <img :src="icon" class="icon-image" />
+                </div>
+            </TransitionGroup>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps } from "vue";
+import { computed } from "vue";
 
-const props = defineProps<{ selectedIcons: string[] }>();
+interface LayoutConfig {
+    sideMargin: number;
+    topOffset: number;
+    verticalGap: number;
+    colorLeft: string;
+    colorRight: string;
+    showBackground: boolean;
+}
+
+const props = defineProps<{
+    selectedIcons: string[];
+    config: LayoutConfig;
+}>();
+
 const emit = defineEmits<{
     (e: "update:selectedIcons", value: string[]): void;
     (e: "deselect", value: string): void;
 }>();
 
-const styles = [
-    { left: "0px", top: "0px", "border-color": "#A34DE5" },
-    { left: "0px", top: "70px", "border-color": "#A34DE5" },
-    { left: "0px", top: "140px", "border-color": "#A34DE5" },
-    { left: "0px", top: "210px", "border-color": "#A34DE5" },
-    { left: "0px", top: "280px", "border-color": "#A34DE5" },
-    { right: "0px", top: "0px", "border-color": "#E5894D" },
-    { right: "0px", top: "70px", "border-color": "#E5894D" },
-    { right: "0px", top: "140px", "border-color": "#E5894D" },
-    { right: "0px", top: "210px", "border-color": "#E5894D" },
-    { right: "0px", top: "280px", "border-color": "#E5894D" },
-];
-
 const iconStyles = computed(() =>
     props.selectedIcons.map((_, index) => {
-        const style = styles[index] || {
-            left: "0px",
-            top: "0px",
-            "border-color": "#000000",
+        const isLeftTeam = index < 5;
+        const localIndex = index % 5;
+        const top =
+            props.config.topOffset + localIndex * props.config.verticalGap;
+
+        const style: Record<string, string> = {
+            top: `${top}px`,
+            "border-color": isLeftTeam
+                ? props.config.colorLeft
+                : props.config.colorRight,
         };
-        return { ...style };
+
+        if (isLeftTeam) {
+            style.left = `${props.config.sideMargin}px`;
+        } else {
+            style.right = `${props.config.sideMargin}px`;
+        }
+
+        return style;
     })
 );
-
-function removeIcon(index: number) {
-    const newIcons = [...props.selectedIcons];
-    const removedIcon = newIcons.splice(index, 1)[0];
-    emit("deselect", removedIcon);
-}
 </script>
 
 <style scoped lang="scss">
 .display-area {
+    position: relative;
     width: 100%;
     height: 100%;
-    // background-image: url("/images/bg/bgSample.png");
+    transition: background 0.5s ease;
+
+    &.with-bg::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("@/assets/images/bg/sample.png");
+        background-size: 100% auto;
+        background-position: top center;
+        background-repeat: no-repeat;
+        opacity: 0.5;
+        z-index: -1;
+    }
 
     .image-area {
         position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        height: 470px;
-        top: 300px;
+        height: 100%;
+        pointer-events: none;
     }
 
-    .placed-icon {
+    .icon-wrapper {
         position: absolute;
-        width: 46px;
-        height: 46px;
+        width: 64px;
+        height: 64px;
         border: 2px solid;
         border-radius: 50%;
-        box-sizing: border-box;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.5);
         cursor: pointer;
-        z-index: 2;
+        pointer-events: auto;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     }
 }
 
-.fade-move-enter-active,
-.fade-move-leave-active {
-    transition: all 0.2s ease;
+/* Animations */
+.icon-list-enter-active,
+.icon-list-leave-active {
+    transition: all 0.5s ease;
 }
-.fade-move-enter-from,
-.fade-move-leave-to {
+
+.icon-list-enter-from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: scale(0.5) translateY(-20px);
+}
+
+.icon-list-leave-to {
+    opacity: 0;
+    transform: scale(0) rotate(15deg);
 }
 </style>
