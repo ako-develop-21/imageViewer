@@ -1,21 +1,24 @@
 <template>
-    <div class="selector">
-        <div
-            v-for="(group, gIndex) in icons"
-            class="select-group"
-            :style="{ backgroundColor: backgroundColors[gIndex] }"
-        >
-            <img
-                v-for="(icon, index) in group"
-                :key="index"
-                :src="icon"
-                class="icon"
-                :class="{ selected: selectedIcons.has(icon) }"
-                @click="iconClickHandler(icon)"
-            />
+    <div class="selector-dock">
+        <div class="groups-container">
+            <div
+                v-for="(group, gIndex) in icons"
+                :key="gIndex"
+                class="select-group"
+                :style="{ '--group-color': backgroundColors[gIndex] }"
+            >
+                <img
+                    v-for="(icon, index) in group"
+                    :key="index"
+                    :src="icon"
+                    class="icon-item"
+                    :class="{ selected: selectedIcons.has(icon) }"
+                    @click="iconClickHandler(icon)"
+                />
+            </div>
         </div>
-        <button class="btn btn-dark reset-button" @click="resetSelection">
-            選択リセット
+        <button class="reset-selection-btn" @click="resetSelection">
+            <span>選択クリア</span>
         </button>
     </div>
 </template>
@@ -96,69 +99,107 @@ defineExpose({ deselect });
 </script>
 
 <style scoped lang="scss">
-.selector {
+.selector-dock {
     position: absolute;
-    top: 0;
-    width: 100%;
-    height: 55px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 95vw;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    max-width: calc((50px + 10px) * 20);
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 24px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 28px;
+    box-shadow: var(--shadow-premium);
+    z-index: 100;
+    transition: all 0.3s ease;
+
+    .groups-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
 
     .select-group {
-        width: 30%;
-        height: 100%;
-        border-radius: 64px;
+        display: flex;
+        padding: 4px;
+        background: color-mix(in srgb, var(--group-color), transparent 85%);
+        border: 1px solid
+            color-mix(in srgb, var(--group-color), transparent 70%);
+        border-radius: 40px;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: color-mix(in srgb, var(--group-color), transparent 75%);
+            border-color: var(--group-color);
+            box-shadow: 0 0 15px
+                color-mix(in srgb, var(--group-color), transparent 50%);
+        }
     }
 
-    .icon {
-        width: 50px;
-        height: 50px;
-        margin: 3px;
-        border: 2px solid #cbcbcb;
+    .icon-item {
+        width: 44px;
+        height: 44px;
+        margin: 2px;
+        border: 2px solid transparent;
         border-radius: 50%;
-        box-sizing: border-box;
         cursor: pointer;
-        transition: filter 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        filter: grayscale(0.2) brightness(0.9);
+
+        &:hover {
+            transform: scale(1.15) translateY(-2px);
+            filter: grayscale(0) brightness(1.1);
+            z-index: 2;
+        }
+
+        &.selected {
+            filter: brightness(0.4) grayscale(1);
+            border-color: rgba(255, 255, 255, 0.1);
+            opacity: 0.5;
+        }
     }
 
-    .icon.selected {
-        filter: brightness(50%);
-    }
-
-    .reset-button {
-        height: 38px;
-        margin-top: 8px;
-        margin-left: 15px;
+    .reset-selection-btn {
+        flex-shrink: 0;
+        height: 40px;
         padding: 0 20px;
         border-radius: 20px;
-        background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #efefef;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 107, 107, 0.1) 0%,
+            rgba(255, 69, 58, 0.1) 100%
+        );
+        border: 1px solid rgba(255, 69, 58, 0.2);
+        color: #ff6b6b;
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 800;
         letter-spacing: 0.5px;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(5px);
 
         &:hover {
-            background: linear-gradient(135deg, #3d3d3d 0%, #252525 100%);
-            border-color: rgba(255, 69, 58, 0.6);
-            color: #ff6b6b;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 107, 107, 0.2) 0%,
+                rgba(255, 69, 58, 0.2) 100%
+            );
+            border-color: rgba(255, 69, 58, 0.5);
+            box-shadow: 0 0 15px rgba(255, 69, 58, 0.2);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4),
-                0 0 10px rgba(255, 69, 58, 0.2);
         }
 
         &:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
         }
     }
 }

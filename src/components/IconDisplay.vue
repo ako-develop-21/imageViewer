@@ -45,11 +45,14 @@ const iconStyles = computed(() =>
         const top =
             props.config.topOffset + localIndex * props.config.verticalGap;
 
+        const color = isLeftTeam
+            ? props.config.colorLeft
+            : props.config.colorRight;
+
         const style: Record<string, string> = {
             top: `${top}px`,
-            "border-color": isLeftTeam
-                ? props.config.colorLeft
-                : props.config.colorRight,
+            "border-color": color,
+            "--glow-color": `${color}66`,
         };
 
         if (isLeftTeam) {
@@ -96,44 +99,53 @@ const iconStyles = computed(() =>
 
     .icon-wrapper {
         position: absolute;
-        width: 64px;
-        height: 64px;
-        border: 2px solid;
+        width: 72px;
+        height: 72px;
+        border: 3px solid;
         border-radius: 50%;
         overflow: hidden;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.7);
         cursor: pointer;
         pointer-events: auto;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 0 20px var(--glow-color, rgba(0, 0, 0, 0.4));
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         &:hover {
-            transform: scale(1.1);
+            transform: scale(1.2);
             z-index: 10;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 35px var(--glow-color, rgba(255, 255, 255, 0.3));
         }
 
         .icon-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            border-radius: 50%;
         }
     }
 }
 
 /* Animations */
-.icon-list-enter-active,
+.icon-list-enter-active {
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .icon-list-leave-active {
-    transition: all 0.5s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 1, 1);
 }
 
 .icon-list-enter-from {
     opacity: 0;
-    transform: scale(0.5) translateY(-20px);
+    transform: scale(0.3) rotate(-15deg);
+    filter: blur(10px);
 }
 
 .icon-list-leave-to {
     opacity: 0;
-    transform: scale(0) rotate(15deg);
+    transform: scale(0.1) translateY(40px);
+    filter: brightness(2) blur(5px);
 }
 </style>

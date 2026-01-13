@@ -4,7 +4,17 @@
             <div class="modal-header">
                 <h2>アイコン配置設定</h2>
                 <button class="close-btn" @click="$emit('close')">
-                    &times;
+                    <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        fill="none"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
             </div>
             <div class="modal-body">
@@ -89,148 +99,184 @@ function handleApply() {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.65);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(14px);
 }
 
 .modal-content {
-    background: #1e1e1e;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    width: 400px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    background: rgba(15, 15, 20, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 32px;
+    width: 460px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
     overflow: hidden;
+    animation: modal-pop 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes modal-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .modal-header {
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
 
     h2 {
         margin: 0;
-        font-size: 18px;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
         color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     .close-btn {
-        background: none;
-        border: none;
-        color: #888;
-        font-size: 24px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        color: #fff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        padding: 0;
-        line-height: 1;
+        transition: all 0.3s ease;
         &:hover {
-            color: #fff;
+            background: rgba(255, 107, 107, 0.2);
+            border-color: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
         }
     }
 }
 
 .modal-body {
-    padding: 20px;
+    padding: 32px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 
     label {
-        color: #aaa;
-        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
     }
 
     input[type="number"] {
-        background: #2c2c2c;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 12px 16px;
         color: #fff;
-        outline: none;
+        font-size: 15px;
+        transition: all 0.3s ease;
         &:focus {
-            border-color: #646cff;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(100, 108, 255, 0.1);
+            outline: none;
         }
     }
 
     input[type="color"] {
         width: 100%;
-        height: 40px;
-        padding: 0;
-        border: none;
-        background: none;
+        height: 48px;
+        padding: 4px;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.2);
         cursor: pointer;
+        transition: all 0.3s ease;
+        &:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
     }
 
     &.checkbox-group {
         flex-direction: row;
         align-items: center;
-        gap: 10px;
-        margin-top: 10px;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        border: 1px solid var(--glass-border);
 
         input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-primary);
             cursor: pointer;
         }
 
         label {
-            cursor: pointer;
-            user-select: none;
-            color: #efefef;
+            text-transform: none;
+            letter-spacing: 0;
+            color: #fff;
             font-size: 14px;
+            cursor: pointer;
         }
     }
 }
 
 .modal-footer {
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 24px 32px;
+    background: rgba(0, 0, 0, 0.1);
+    border-top: 1px solid var(--glass-border);
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
+    gap: 16px;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
-    border: none;
-    padding: 10px 24px;
-    border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 40px;
+    border-radius: 16px;
     color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
     &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
-    }
-    &:active {
-        transform: translateY(0);
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(79, 70, 229, 0.5);
     }
 }
 
 .btn-secondary {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 10px 24px;
-    border-radius: 8px;
-    color: #ccc;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 28px;
+    border-radius: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
     &:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
         color: #fff;
-        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-1px);
     }
 }
 </style>
