@@ -27,7 +27,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { db } from "@/firebase";
+import { ref as dbRef, onValue, set } from "firebase/database";
 import IconSelector from "@/components/IconSelector.vue";
 import IconDisplay from "@/components/IconDisplay.vue";
 import SettingsModal from "@/components/SettingsModal.vue";
@@ -54,7 +56,16 @@ const DEFAULT_CONFIG: LayoutConfig = {
 const layoutConfig = ref<LayoutConfig>({ ...DEFAULT_CONFIG });
 const isSettingsOpen = ref(false);
 
-// 設定の読み込み
+// ルームIDの取得
+const urlParams = new URLSearchParams(window.location.search);
+const roomId = urlParams.get("room") || "default_room";
+const iconsRef = dbRef(db, `matches/${roomId}/icons`);
+
+// 選択中アイコン配列
+const selectedIcons = ref<string[]>([]);
+const isInternalUpdate = ref(false);
+
+// 設定の読み込みとFirebase同期の開始
 onMounted(() => {
     const saved = localStorage.getItem("layout_config");
     if (saved) {
@@ -64,7 +75,34 @@ onMounted(() => {
             console.error("Failed to load layout config", e);
         }
     }
+
+    // Firebaseデータの監視
+    onValue(iconsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data !== null) {
+            isInternalUpdate.value = true;
+            // リモートからの更新を反映
+            selectedIcons.value = Array.isArray(data) ? data : [];
+
+            // IconSelector側の同期
+            // 少し遅延させないとRefが取れない場合がある
+            setTimeout(() => {
+                isInternalUpdate.value = false;
+            }, 50);
+        }
+    });
 });
+
+// ローカルの変更をFirebaseに同期
+watch(
+    selectedIcons,
+    (newIcons) => {
+        if (!isInternalUpdate.value) {
+            set(iconsRef, JSON.parse(JSON.stringify(newIcons)));
+        }
+    },
+    { deep: true }
+);
 
 // 設定の保存
 function handleApplySettings(newConfig: LayoutConfig) {
@@ -72,9 +110,6 @@ function handleApplySettings(newConfig: LayoutConfig) {
     localStorage.setItem("layout_config", JSON.stringify(newConfig));
     isSettingsOpen.value = false;
 }
-
-// 選択中アイコン配列
-const selectedIcons = ref<string[]>([]);
 
 // IconSelectorへの参照
 const iconSelectorRef = ref<InstanceType<typeof IconSelector>>();
