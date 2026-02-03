@@ -37,6 +37,9 @@
                                 duplicateCounts[
                                     team.members[slotIdx - 1] as string
                                 ] > 1,
+                            selected:
+                                selectedSlot?.teamIdx === tIdx &&
+                                selectedSlot?.slotIdx === slotIdx - 1,
                         }"
                         @click="assignPlayerToSlot(tIdx, slotIdx - 1)"
                         @contextmenu.prevent="
@@ -113,13 +116,14 @@ import { ref, computed, onMounted, watch } from "vue";
 import { db } from "@/firebase";
 import { ref as dbRef, onValue, set } from "firebase/database";
 
-// Auto-load player images from assets
+/** カード画像 */
 const cardAssets = import.meta.glob("@/assets/images/card/*.png", {
     eager: true,
     query: "?url",
     import: "default",
 });
 
+/** プレイヤー画像 */
 const playerPool = computed(() => {
     const pool: Record<string, string> = {};
     Object.entries(cardAssets).forEach(([path, url]) => {
@@ -129,32 +133,36 @@ const playerPool = computed(() => {
     return pool;
 });
 
-// Sort player IDs by filename (ascending order)
+/** プレイヤーIDリスト */
 const sortedPlayerIds = computed(() => {
     return Object.keys(playerPool.value).sort((a, b) => a.localeCompare(b));
 });
 
-// Team structure
+/** チーム構造 */
 interface Team {
     id: string;
     members: (string | null)[]; // 4 slots
 }
 
+/** チーム数 */
 type TeamCount = 6 | 8;
 
+/** 内部更新フラグ */
 const isInternalUpdate = ref(false);
-
-// Pool collapse state
+/** プール表示/非表示 */
 const isPoolCollapsed = ref(false);
-
-// State
+/** チーム数 */
 const teamCount = ref<TeamCount>(6);
+/** チーム */
 const teams = ref<Team[]>([]);
+/** 選択プレイヤー */
 const selectedPlayerId = ref<string | null>(null);
-
-// Firebase - Fixed path for shared access (no room ID)
+/** 選択スロット */
+const selectedSlot = ref<{ teamIdx: number; slotIdx: number } | null>(null);
+/** Firebase - Fixed path for shared access (no room ID) */
 const draftRef = dbRef(db, `draft-rooms/shared`);
 
+/** 初期化 */
 const initTeams = (count: TeamCount): Team[] => {
     return Array.from({ length: count }, (_, i) => ({
         id: `t${i + 1}`,
@@ -185,6 +193,7 @@ onMounted(() => {
     });
 });
 
+/** Firebase同期 */
 const syncToFirebase = () => {
     if (isInternalUpdate.value) return;
     isInternalUpdate.value = true;
@@ -203,7 +212,7 @@ watch(
     { deep: true },
 );
 
-// Duplicate Detection
+/** 重複数 */
 const duplicateCounts = computed(() => {
     const counts: Record<string, number> = {};
     teams.value?.forEach((team) => {
@@ -214,6 +223,10 @@ const duplicateCounts = computed(() => {
     return counts;
 });
 
+/**
+ * プレイヤーが選ばれているか
+ * @param playerId プレイヤーID
+ */
 const isDrafted = (playerId: string) => {
     return (
         teams.value?.some(
@@ -222,25 +235,65 @@ const isDrafted = (playerId: string) => {
     );
 };
 
-// Actions
+/**
+ * プレイヤー選択時
+ * @param playerId 選択したプレイヤーID
+ */
 const selectPlayer = (playerId: string) => {
-    selectedPlayerId.value =
-        selectedPlayerId.value === playerId ? null : playerId;
+    if (selectedSlot.value) {
+        const { teamIdx, slotIdx } = selectedSlot.value;
+        if (!teams.value[teamIdx].members) {
+            teams.value[teamIdx].members = [null, null, null, null];
+        }
+        teams.value[teamIdx].members[slotIdx] = playerId;
+        selectedSlot.value = null;
+        selectedPlayerId.value = null;
+    } else {
+        selectedPlayerId.value =
+            selectedPlayerId.value === playerId ? null : playerId;
+        selectedSlot.value = null;
+    }
 };
 
+/**
+ * プレイヤー配置時
+ * @param teamIdx チーム番号
+ * @param slotIdx スロット番号
+ */
 const assignPlayerToSlot = (teamIdx: number, slotIdx: number) => {
     if (!teams.value[teamIdx]) return;
-    if (!selectedPlayerId.value) {
-        removePlayerFromSlot(teamIdx, slotIdx);
-        return;
+
+    if (selectedPlayerId.value) {
+        if (!teams.value[teamIdx].members) {
+            teams.value[teamIdx].members = [null, null, null, null];
+        }
+        teams.value[teamIdx].members[slotIdx] = selectedPlayerId.value;
+        selectedPlayerId.value = null;
+        selectedSlot.value = null;
+    } else {
+        if (
+            teams.value[teamIdx].members &&
+            teams.value[teamIdx].members[slotIdx]
+        ) {
+            teams.value[teamIdx].members[slotIdx] = null;
+            selectedSlot.value = null;
+        } else if (
+            selectedSlot.value?.teamIdx === teamIdx &&
+            selectedSlot.value?.slotIdx === slotIdx
+        ) {
+            selectedSlot.value = null;
+        } else {
+            selectedSlot.value = { teamIdx, slotIdx };
+            selectedPlayerId.value = null;
+        }
     }
-    if (!teams.value[teamIdx].members) {
-        teams.value[teamIdx].members = [null, null, null, null];
-    }
-    teams.value[teamIdx].members[slotIdx] = selectedPlayerId.value;
-    selectedPlayerId.value = null;
 };
 
+/**
+ * スロットからプレイヤーを削除時
+ * @param teamIdx チーム番号
+ * @param slotIdx スロット番号
+ */
 const removePlayerFromSlot = (teamIdx: number, slotIdx: number) => {
     if (!teams.value[teamIdx]) return;
     if (!teams.value[teamIdx].members) {
@@ -250,18 +303,19 @@ const removePlayerFromSlot = (teamIdx: number, slotIdx: number) => {
     teams.value[teamIdx].members[slotIdx] = null;
 };
 
+/** チーム数変更時 */
 const toggleTeamCount = () => {
     const newCount = teamCount.value === 6 ? 8 : 6;
     teamCount.value = newCount;
     teams.value = initTeams(newCount);
 };
 
+/** リセット時 */
 const resetDraft = () => {
-    if (confirm("全てのドラフトをリセットしますか？")) {
-        teams.value = initTeams(teamCount.value);
-    }
+    teams.value = initTeams(teamCount.value);
 };
 
+/** プール表示/非表示切り替え時 */
 const togglePool = () => {
     isPoolCollapsed.value = !isPoolCollapsed.value;
 };
@@ -278,7 +332,6 @@ const togglePool = () => {
     margin: 0 auto;
 }
 
-// Header
 .header {
     position: absolute;
     top: 10px;
@@ -327,7 +380,6 @@ const togglePool = () => {
     }
 }
 
-// Teams Container
 .teams-container {
     position: absolute;
     top: 40px;
@@ -351,7 +403,6 @@ const togglePool = () => {
         height: 340px;
 
         .team-block {
-            // Narrower for 8 teams
             .leader-frame {
                 width: 110px;
                 height: 110px;
@@ -372,7 +423,6 @@ const togglePool = () => {
     align-items: center;
 }
 
-// Leader Frame
 .leader-frame {
     width: 90px;
     height: 90px;
@@ -395,7 +445,6 @@ const togglePool = () => {
     }
 }
 
-// Draft Slots
 .draft-slots {
     display: flex;
     flex-direction: column;
@@ -421,6 +470,12 @@ const togglePool = () => {
         border-width: 3px;
         box-shadow: 0 0 12px rgba(255, 71, 87, 0.5);
         animation: pulse-red 2s infinite;
+    }
+
+    &.selected {
+        border-color: #a34de5;
+        box-shadow: 0 0 15px rgba(163, 77, 229, 0.6);
+        z-index: 10;
     }
 
     .player-img {
@@ -462,7 +517,6 @@ const togglePool = () => {
     }
 }
 
-// Draft Pool
 .draft-pool {
     position: absolute;
     left: 10px;
