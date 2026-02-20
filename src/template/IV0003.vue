@@ -117,7 +117,7 @@ import { db } from "@/firebase";
 import { ref as dbRef, onValue, set } from "firebase/database";
 
 /** カード画像 */
-const cardAssets = import.meta.glob("@/assets/images/card/*.png", {
+const cardAssets = import.meta.glob("@/assets/images/draft/*.png", {
     eager: true,
     query: "?url",
     import: "default",
