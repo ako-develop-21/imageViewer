@@ -323,8 +323,8 @@ const togglePool = () => {
 
 <style scoped lang="scss">
 .draft-canvas {
-    width: 1280px;
-    height: 720px;
+    width: 1920px;
+    height: 1080px;
     position: relative;
     overflow: hidden;
     color: white;
@@ -334,9 +334,9 @@ const togglePool = () => {
 
 .header {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
+    top: 15px;
+    left: 15px;
+    right: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -345,16 +345,16 @@ const togglePool = () => {
 
 .controls {
     display: flex;
-    gap: 6px;
+    gap: 10px;
 
     button {
         background: rgba(0, 0, 0, 0.6);
         color: white;
         border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 6px 14px;
-        border-radius: 4px;
+        padding: 10px 20px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 11px;
+        font-size: 16px;
         font-weight: 700;
         transition: all 0.2s;
 
@@ -382,35 +382,35 @@ const togglePool = () => {
 
 .teams-container {
     position: absolute;
-    top: 40px;
-    left: 10px;
-    right: 10px;
+    top: 60px;
+    left: 15px;
+    right: 15px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 8px;
-    padding: 5px 0;
+    gap: 12px;
+    padding: 10px 0;
 
     &.teams-6 {
         flex-wrap: nowrap;
-        gap: 12px;
-        height: 440px;
+        gap: 20px;
+        height: 660px;
     }
 
     &.teams-8 {
         flex-wrap: nowrap;
-        gap: 6px;
-        height: 340px;
+        gap: 10px;
+        height: 510px;
 
         .team-block {
             .leader-frame {
-                width: 110px;
-                height: 110px;
+                width: 165px;
+                height: 165px;
             }
 
             .draft-slot {
-                width: 100px;
-                height: 52px;
+                width: 150px;
+                height: 78px;
             }
         }
     }
@@ -419,44 +419,44 @@ const togglePool = () => {
 .team-block {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
     align-items: center;
 }
 
 .leader-frame {
-    width: 90px;
-    height: 90px;
-    border: 2px dashed rgba(255, 255, 255, 0.4);
-    border-radius: 8px;
+    width: 135px;
+    height: 135px;
+    border: 3px dashed rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    margin: 20px;
+    margin: 30px;
     box-sizing: content-box;
 
     .leader-label {
-        font-size: 10px;
+        font-size: 15px;
         font-weight: 800;
         color: rgba(255, 255, 255, 0.3);
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.5px;
     }
 }
 
 .draft-slots {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .draft-slot {
-    width: 130px;
-    height: 70px;
+    width: 195px;
+    height: 105px;
     background: rgba(0, 0, 0, 0.4);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-radius: 9px;
     overflow: hidden;
     cursor: pointer;
     transition: all 0.2s;
@@ -467,14 +467,14 @@ const togglePool = () => {
 
     &.is-duplicate {
         border-color: #ff4757;
-        border-width: 3px;
-        box-shadow: 0 0 12px rgba(255, 71, 87, 0.5);
+        border-width: 4px;
+        box-shadow: 0 0 18px rgba(255, 71, 87, 0.5);
         animation: pulse-red 2s infinite;
     }
 
     &.selected {
         border-color: #a34de5;
-        box-shadow: 0 0 15px rgba(163, 77, 229, 0.6);
+        box-shadow: 0 0 22px rgba(163, 77, 229, 0.6);
         z-index: 10;
     }
 
@@ -487,7 +487,7 @@ const togglePool = () => {
 
     .empty-slot {
         .plus {
-            font-size: 24px;
+            font-size: 36px;
             color: rgba(255, 255, 255, 0.1);
             font-weight: 900;
         }
@@ -495,15 +495,15 @@ const togglePool = () => {
 
     .duplicate-badge {
         position: absolute;
-        top: 4px;
-        right: 4px;
+        top: 6px;
+        right: 6px;
         background: #ff4757;
         color: white;
-        padding: 2px 6px;
-        border-radius: 8px;
-        font-size: 10px;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-size: 15px;
         font-weight: 900;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 3px 9px rgba(0, 0, 0, 0.4);
     }
 }
 
@@ -513,24 +513,24 @@ const togglePool = () => {
         box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.5);
     }
     50% {
-        box-shadow: 0 0 0 8px rgba(255, 71, 87, 0);
+        box-shadow: 0 0 0 12px rgba(255, 71, 87, 0);
     }
 }
 
 .draft-pool {
     position: absolute;
-    left: 10px;
-    right: 10px;
+    left: 15px;
+    right: 15px;
     background: rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
-    padding: 8px;
-    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 12px;
+    backdrop-filter: blur(15px);
     overflow: hidden;
     transition: all 0.3s ease;
 
     &.teams-6 {
-        bottom: 10px;
-        height: 200px;
+        bottom: 15px;
+        height: 300px;
 
         .pool-scroll {
             grid-template-columns: repeat(12, 1fr);
@@ -539,8 +539,8 @@ const togglePool = () => {
     }
 
     &.teams-8 {
-        bottom: 10px;
-        height: 280px;
+        bottom: 15px;
+        height: 420px;
 
         .pool-scroll {
             grid-template-columns: repeat(16, 1fr);
@@ -549,21 +549,21 @@ const togglePool = () => {
     }
 
     &.collapsed {
-        height: 40px;
+        height: 60px;
     }
 }
 
 .collapse-btn {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 30px;
-    height: 30px;
+    top: 12px;
+    right: 12px;
+    width: 45px;
+    height: 45px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+    border-radius: 6px;
     color: white;
-    font-size: 14px;
+    font-size: 20px;
     cursor: pointer;
     z-index: 10;
     transition: all 0.2s;
@@ -580,14 +580,14 @@ const togglePool = () => {
 .pool-scroll {
     display: grid;
     height: 100%;
-    gap: 4px;
+    gap: 6px;
     overflow: hidden;
 }
 
 .pool-player {
-    border-radius: 6px;
+    border-radius: 9px;
     overflow: hidden;
-    border: 2px solid transparent;
+    border: 3px solid transparent;
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
@@ -603,7 +603,7 @@ const togglePool = () => {
         border-color: #a34de5;
         transform: scale(1.05);
         z-index: 10;
-        box-shadow: 0 0 15px rgba(163, 77, 229, 0.6);
+        box-shadow: 0 0 22px rgba(163, 77, 229, 0.6);
     }
 
     &.drafted {
