@@ -12,6 +12,7 @@
         <IconSelector
             class="icon-selector"
             ref="iconSelectorRef"
+            :selectedIcons="selectedIcons"
             @select="addIcon"
             @deselect="removeIcon"
         />
@@ -58,12 +59,13 @@ const isSettingsOpen = ref(false);
 
 // ルームIDの取得
 const urlParams = new URLSearchParams(window.location.search);
-const roomId = urlParams.get("room") || "default_room";
+const roomId = urlParams.get("room") || "shared";
 const iconsRef = dbRef(db, `matches/${roomId}/icons`);
 
 // 選択中アイコン配列
 const selectedIcons = ref<string[]>([]);
-const isInternalUpdate = ref(false);
+/** Flag to prevent loops when syncing from remote */
+const isUpdatingFromRemote = ref(false);
 
 // 設定の読み込みとFirebase同期の開始
 onMounted(() => {
@@ -79,29 +81,35 @@ onMounted(() => {
     // Firebaseデータの監視
     onValue(iconsRef, (snapshot) => {
         const data = snapshot.val();
-        if (data !== null) {
-            isInternalUpdate.value = true;
-            // リモートからの更新を反映
-            selectedIcons.value = Array.isArray(data) ? data : [];
+        isUpdatingFromRemote.value = true;
+        // リモートからの更新を反映 (nullの場合は空配列)
+        selectedIcons.value = Array.isArray(data) ? data : [];
 
-            // IconSelector側の同期
-            // 少し遅延させないとRefが取れない場合がある
-            setTimeout(() => {
-                isInternalUpdate.value = false;
-            }, 50);
-        }
+        // リ reactivityが反映された後にフラグを下ろす
+        setTimeout(() => {
+            isUpdatingFromRemote.value = false;
+        }, 0);
     });
 });
+
+/** Firebase同期: Debounce to handle rapid successive changes */
+let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+const syncToFirebase = () => {
+    if (isUpdatingFromRemote.value) return;
+
+    if (syncTimeout) clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => {
+        set(iconsRef, JSON.parse(JSON.stringify(selectedIcons.value)));
+    }, 50);
+};
 
 // ローカルの変更をFirebaseに同期
 watch(
     selectedIcons,
-    (newIcons) => {
-        if (!isInternalUpdate.value) {
-            set(iconsRef, JSON.parse(JSON.stringify(newIcons)));
-        }
+    () => {
+        syncToFirebase();
     },
-    { deep: true }
+    { deep: true },
 );
 
 // 設定の保存

@@ -12,7 +12,7 @@
                     :key="index"
                     :src="icon"
                     class="icon-item"
-                    :class="{ selected: selectedIcons.has(icon) }"
+                    :class="{ selected: selectedSet.has(icon) }"
                     @click="iconClickHandler(icon)"
                 />
             </div>
@@ -26,6 +26,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { ref } from "vue";
+
+const props = withDefaults(
+    defineProps<{
+        selectedIcons?: string[];
+    }>(),
+    {
+        selectedIcons: () => [],
+    },
+);
 
 const emit = defineEmits<{
     (e: "select", value: string): void;
@@ -50,8 +59,8 @@ const backgroundColors = [
     "#f2f2f2",
 ];
 
-/** 選択済みアイコン */
-const selectedIcons = ref<Set<string>>(new Set());
+/** 選択済みアイコンのSet（表示判定用内部Setをやめ、propsから判定） */
+const selectedSet = computed(() => new Set(props.selectedIcons));
 
 /** アイコン一覧 */
 const icons = computed<string[][]>(() => {
@@ -69,30 +78,27 @@ const icons = computed<string[][]>(() => {
 
 /** アイコン押下時 */
 const iconClickHandler = (icon: string) => {
-    if (selectedIcons.value.has(icon)) {
-        selectedIcons.value.delete(icon);
+    if (selectedSet.value.has(icon)) {
         emit("deselect", icon);
     } else {
-        if (selectedIcons.value.size >= 10) return;
-        selectedIcons.value.add(icon);
+        if (selectedSet.value.size >= 10) return;
         emit("select", icon);
     }
 };
 
-/** 親から選択解除を呼べるように */
+/** 親から選択解除を呼べるように（互換性のために残す） */
 const deselect = (icon: string) => {
-    selectedIcons.value.delete(icon);
+    // コンポーネント内部で状態を持たなくなったため、現在は実質emitされるだけ
+    if (selectedSet.value.has(icon)) {
+        emit("deselect", icon);
+    }
 };
 
 /** 選択状態のリセット */
 const resetSelection = () => {
-    const selected = icons.value
-        .flatMap((v) => v)
-        .filter((v) => selectedIcons.value.has(v))
-        .forEach((v) => {
-            selectedIcons.value.delete(v);
-            emit("deselect", v);
-        });
+    props.selectedIcons.forEach((v) => {
+        emit("deselect", v);
+    });
 };
 
 defineExpose({ deselect });

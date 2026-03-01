@@ -147,8 +147,6 @@ interface Team {
 /** チーム数 */
 type TeamCount = 6 | 8;
 
-/** 内部更新フラグ */
-const isInternalUpdate = ref(false);
 /** プール表示/非表示 */
 const isPoolCollapsed = ref(false);
 /** チーム数 */
@@ -159,8 +157,10 @@ const teams = ref<Team[]>([]);
 const selectedPlayerId = ref<string | null>(null);
 /** 選択スロット */
 const selectedSlot = ref<{ teamIdx: number; slotIdx: number } | null>(null);
-/** Firebase - Fixed path for shared access (no room ID) */
-const draftRef = dbRef(db, `draft-rooms/shared`);
+// Room ID strategy: Use query parameter 'room' to isolate state, matching IV0002.vue
+const urlParams = new URLSearchParams(window.location.search);
+const roomId = urlParams.get("room") || "shared";
+const draftRef = dbRef(db, `draft-rooms/${roomId}`);
 
 /** 初期化 */
 const initTeams = (count: TeamCount): Team[] => {
@@ -170,22 +170,23 @@ const initTeams = (count: TeamCount): Team[] => {
     }));
 };
 
+/** Flag to prevent loops when syncing from remote */
+const isUpdatingFromRemote = ref(false);
+
 onMounted(() => {
     onValue(draftRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            // Only update if not from our own sync
-            if (!isInternalUpdate.value) {
-                isInternalUpdate.value = true;
-                teamCount.value = data.teamCount || 6;
-                const rawTeams = data.teams || initTeams(teamCount.value);
-                // Sanitize: Ensure members exists for each team
-                teams.value = rawTeams.map((t: any) => ({
-                    ...t,
-                    members: t.members || [null, null, null, null],
-                }));
-                setTimeout(() => (isInternalUpdate.value = false), 50);
-            }
+            isUpdatingFromRemote.value = true;
+            teamCount.value = data.teamCount || 6;
+            const rawTeams = data.teams || initTeams(teamCount.value);
+            // Sanitize: Ensure members exists for each team
+            teams.value = rawTeams.map((t: any) => ({
+                ...t,
+                members: t.members || [null, null, null, null],
+            }));
+            // Use nextTick approximation to reset flag after Vue updates its reactivity
+            setTimeout(() => (isUpdatingFromRemote.value = false), 0);
         } else {
             teams.value = initTeams(teamCount.value);
             syncToFirebase();
@@ -193,21 +194,33 @@ onMounted(() => {
     });
 });
 
-/** Firebase同期 */
-const syncToFirebase = () => {
-    if (isInternalUpdate.value) return;
-    isInternalUpdate.value = true;
-    set(draftRef, {
-        teamCount: teamCount.value,
-        teams: JSON.parse(JSON.stringify(teams.value)),
-    });
-    setTimeout(() => (isInternalUpdate.value = false), 100);
+/** Firebase同期: Debounce to handle rapid successive changes */
+let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+const syncToFirebase = (immediate = false) => {
+    if (isUpdatingFromRemote.value) return;
+
+    const performSync = () => {
+        set(draftRef, {
+            teamCount: teamCount.value,
+            teams: JSON.parse(JSON.stringify(teams.value)),
+        });
+    };
+
+    if (syncTimeout) clearTimeout(syncTimeout);
+
+    if (immediate) {
+        performSync();
+    } else {
+        syncTimeout = setTimeout(performSync, 50);
+    }
 };
 
 watch(
     [teamCount, teams],
-    () => {
-        syncToFirebase();
+    (_, oldValues) => {
+        // If teamCount changed, sync immediately to avoid UI flickering/inconsistency
+        const teamCountChanged = oldValues && oldValues[0] !== teamCount.value;
+        syncToFirebase(teamCountChanged);
     },
     { deep: true },
 );
