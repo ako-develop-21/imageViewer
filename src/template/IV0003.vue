@@ -546,8 +546,10 @@ const togglePool = () => {
         height: 300px;
 
         .pool-scroll {
-            grid-template-columns: repeat(12, 1fr);
-            grid-template-rows: repeat(2, 1fr);
+            grid-template-columns: repeat(12, 135px);
+            grid-template-rows: repeat(2, 135px);
+            justify-content: center;
+            align-content: center;
         }
     }
 
@@ -556,8 +558,10 @@ const togglePool = () => {
         height: 420px;
 
         .pool-scroll {
-            grid-template-columns: repeat(16, 1fr);
-            grid-template-rows: repeat(2, 1fr);
+            grid-template-columns: repeat(16, 111px);
+            grid-template-rows: repeat(2, 111px);
+            justify-content: center;
+            align-content: center;
         }
     }
 
@@ -605,6 +609,11 @@ const togglePool = () => {
     transition: all 0.2s;
     position: relative;
     background: rgba(0, 0, 0, 0.3);
+    aspect-ratio: 1;
+    max-width: 100%;
+    max-height: 100%;
+    justify-self: center;
+    align-self: center;
 
     img {
         width: 100%;
