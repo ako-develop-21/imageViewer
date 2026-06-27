@@ -58,7 +58,7 @@ const layoutConfig = ref<LayoutConfig>({ ...DEFAULT_CONFIG });
 const isSettingsOpen = ref(false);
 
 // ルームIDの取得
-const urlParams = new URLSearchParams(window.location.search);
+const urlParams = new URLSearchParams(window.location.search || window.location.hash.split("?")[1] || "");
 const roomId = urlParams.get("room") || "shared";
 const iconsRef = dbRef(db, `matches/${roomId}/icons`);
 

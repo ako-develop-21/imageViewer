@@ -158,7 +158,7 @@ const selectedPlayerId = ref<string | null>(null);
 /** 選択スロット */
 const selectedSlot = ref<{ teamIdx: number; slotIdx: number } | null>(null);
 // Room ID strategy: Use query parameter 'room' to isolate state, matching IV0002.vue
-const urlParams = new URLSearchParams(window.location.search);
+const urlParams = new URLSearchParams(window.location.search || window.location.hash.split("?")[1] || "");
 const roomId = urlParams.get("room") || "shared";
 const draftRef = dbRef(db, `draft-rooms/${roomId}`);
 
