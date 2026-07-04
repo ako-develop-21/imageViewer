@@ -14,7 +14,10 @@
         </div>
 
         <!-- Teams Area -->
-        <div class="teams-container" :class="`teams-${teamCount} slots-${slotsCount}`">
+        <div
+            class="teams-container"
+            :class="`teams-${teamCount} slots-${slotsCount}`"
+        >
             <div
                 v-for="(team, tIdx) in teams"
                 :key="team.id"
@@ -87,7 +90,11 @@
         <!-- Draft Pool -->
         <div
             class="draft-pool"
-            :class="[`teams-${teamCount}`, `slots-${slotsCount}`, { collapsed: isPoolCollapsed }]"
+            :class="[
+                `teams-${teamCount}`,
+                `slots-${slotsCount}`,
+                { collapsed: isPoolCollapsed },
+            ]"
         >
             <button
                 class="collapse-btn"
@@ -165,7 +172,9 @@ const selectedPlayerId = ref<string | null>(null);
 /** 選択スロット */
 const selectedSlot = ref<{ teamIdx: number; slotIdx: number } | null>(null);
 // Room ID strategy: Use query parameter 'room' to isolate state, matching IV0002.vue
-const urlParams = new URLSearchParams(window.location.search || window.location.hash.split("?")[1] || "");
+const urlParams = new URLSearchParams(
+    window.location.search || window.location.hash.split("?")[1] || "",
+);
 const roomId = urlParams.get("room") || "shared";
 const draftRef = dbRef(db, `draft-rooms/${roomId}`);
 
@@ -187,7 +196,8 @@ onMounted(() => {
             isUpdatingFromRemote.value = true;
             teamCount.value = data.teamCount || 6;
             slotsCount.value = data.slotsCount || 4;
-            const rawTeams = data.teams || initTeams(teamCount.value, slotsCount.value);
+            const rawTeams =
+                data.teams || initTeams(teamCount.value, slotsCount.value);
             // Sanitize: Ensure members exists for each team and has slotsCount length
             teams.value = rawTeams.map((t: any) => {
                 const members = t.members || [];
@@ -234,7 +244,10 @@ watch(
     [teamCount, slotsCount, teams],
     (_, oldValues) => {
         // If teamCount or slotsCount changed, sync immediately to avoid UI flickering/inconsistency
-        const countChanged = oldValues && (oldValues[0] !== teamCount.value || oldValues[1] !== slotsCount.value);
+        const countChanged =
+            oldValues &&
+            (oldValues[0] !== teamCount.value ||
+                oldValues[1] !== slotsCount.value);
         syncToFirebase(countChanged);
     },
     { deep: true },
