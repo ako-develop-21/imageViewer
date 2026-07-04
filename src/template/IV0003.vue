@@ -6,12 +6,15 @@
                 <button @click="toggleTeamCount" class="toggle-btn">
                     Teams: {{ teamCount }}
                 </button>
+                <button @click="toggleSlotsCount" class="toggle-btn">
+                    Slots: {{ slotsCount }}
+                </button>
                 <button class="reset-btn" @click="resetDraft">Reset</button>
             </div>
         </div>
 
         <!-- Teams Area -->
-        <div class="teams-container" :class="`teams-${teamCount}`">
+        <div class="teams-container" :class="`teams-${teamCount} slots-${slotsCount}`">
             <div
                 v-for="(team, tIdx) in teams"
                 :key="team.id"
@@ -22,10 +25,10 @@
                     <span class="leader-label">Leader {{ tIdx + 1 }}</span>
                 </div>
 
-                <!-- Draft Slots (4 members) -->
+                <!-- Draft Slots -->
                 <div class="draft-slots">
                     <div
-                        v-for="slotIdx in 4"
+                        v-for="slotIdx in slotsCount"
                         :key="slotIdx"
                         class="draft-slot"
                         :class="{
@@ -84,7 +87,7 @@
         <!-- Draft Pool -->
         <div
             class="draft-pool"
-            :class="[`teams-${teamCount}`, { collapsed: isPoolCollapsed }]"
+            :class="[`teams-${teamCount}`, `slots-${slotsCount}`, { collapsed: isPoolCollapsed }]"
         >
             <button
                 class="collapse-btn"
@@ -141,16 +144,20 @@ const sortedPlayerIds = computed(() => {
 /** チーム構造 */
 interface Team {
     id: string;
-    members: (string | null)[]; // 4 slots
+    members: (string | null)[];
 }
 
 /** チーム数 */
 type TeamCount = 6 | 8;
+/** ドラフト選択プレイヤー数 */
+type SlotsCount = 4 | 5;
 
 /** プール表示/非表示 */
 const isPoolCollapsed = ref(false);
 /** チーム数 */
 const teamCount = ref<TeamCount>(6);
+/** ドラフト選択プレイヤー数 */
+const slotsCount = ref<SlotsCount>(4);
 /** チーム */
 const teams = ref<Team[]>([]);
 /** 選択プレイヤー */
@@ -163,10 +170,10 @@ const roomId = urlParams.get("room") || "shared";
 const draftRef = dbRef(db, `draft-rooms/${roomId}`);
 
 /** 初期化 */
-const initTeams = (count: TeamCount): Team[] => {
-    return Array.from({ length: count }, (_, i) => ({
+const initTeams = (tCount: TeamCount, sCount: SlotsCount): Team[] => {
+    return Array.from({ length: tCount }, (_, i) => ({
         id: `t${i + 1}`,
-        members: [null, null, null, null],
+        members: Array(sCount).fill(null),
     }));
 };
 
@@ -179,16 +186,23 @@ onMounted(() => {
         if (data) {
             isUpdatingFromRemote.value = true;
             teamCount.value = data.teamCount || 6;
-            const rawTeams = data.teams || initTeams(teamCount.value);
-            // Sanitize: Ensure members exists for each team
-            teams.value = rawTeams.map((t: any) => ({
-                ...t,
-                members: t.members || [null, null, null, null],
-            }));
+            slotsCount.value = data.slotsCount || 4;
+            const rawTeams = data.teams || initTeams(teamCount.value, slotsCount.value);
+            // Sanitize: Ensure members exists for each team and has slotsCount length
+            teams.value = rawTeams.map((t: any) => {
+                const members = t.members || [];
+                while (members.length < slotsCount.value) {
+                    members.push(null);
+                }
+                return {
+                    ...t,
+                    members: members.slice(0, slotsCount.value),
+                };
+            });
             // Use nextTick approximation to reset flag after Vue updates its reactivity
             setTimeout(() => (isUpdatingFromRemote.value = false), 0);
         } else {
-            teams.value = initTeams(teamCount.value);
+            teams.value = initTeams(teamCount.value, slotsCount.value);
             syncToFirebase();
         }
     });
@@ -202,6 +216,7 @@ const syncToFirebase = (immediate = false) => {
     const performSync = () => {
         set(draftRef, {
             teamCount: teamCount.value,
+            slotsCount: slotsCount.value,
             teams: JSON.parse(JSON.stringify(teams.value)),
         });
     };
@@ -216,11 +231,11 @@ const syncToFirebase = (immediate = false) => {
 };
 
 watch(
-    [teamCount, teams],
+    [teamCount, slotsCount, teams],
     (_, oldValues) => {
-        // If teamCount changed, sync immediately to avoid UI flickering/inconsistency
-        const teamCountChanged = oldValues && oldValues[0] !== teamCount.value;
-        syncToFirebase(teamCountChanged);
+        // If teamCount or slotsCount changed, sync immediately to avoid UI flickering/inconsistency
+        const countChanged = oldValues && (oldValues[0] !== teamCount.value || oldValues[1] !== slotsCount.value);
+        syncToFirebase(countChanged);
     },
     { deep: true },
 );
@@ -256,7 +271,7 @@ const selectPlayer = (playerId: string) => {
     if (selectedSlot.value) {
         const { teamIdx, slotIdx } = selectedSlot.value;
         if (!teams.value[teamIdx].members) {
-            teams.value[teamIdx].members = [null, null, null, null];
+            teams.value[teamIdx].members = Array(slotsCount.value).fill(null);
         }
         teams.value[teamIdx].members[slotIdx] = playerId;
         selectedSlot.value = null;
@@ -278,7 +293,7 @@ const assignPlayerToSlot = (teamIdx: number, slotIdx: number) => {
 
     if (selectedPlayerId.value) {
         if (!teams.value[teamIdx].members) {
-            teams.value[teamIdx].members = [null, null, null, null];
+            teams.value[teamIdx].members = Array(slotsCount.value).fill(null);
         }
         teams.value[teamIdx].members[slotIdx] = selectedPlayerId.value;
         selectedPlayerId.value = null;
@@ -310,7 +325,7 @@ const assignPlayerToSlot = (teamIdx: number, slotIdx: number) => {
 const removePlayerFromSlot = (teamIdx: number, slotIdx: number) => {
     if (!teams.value[teamIdx]) return;
     if (!teams.value[teamIdx].members) {
-        teams.value[teamIdx].members = [null, null, null, null];
+        teams.value[teamIdx].members = Array(slotsCount.value).fill(null);
         return;
     }
     teams.value[teamIdx].members[slotIdx] = null;
@@ -320,12 +335,29 @@ const removePlayerFromSlot = (teamIdx: number, slotIdx: number) => {
 const toggleTeamCount = () => {
     const newCount = teamCount.value === 6 ? 8 : 6;
     teamCount.value = newCount;
-    teams.value = initTeams(newCount);
+    teams.value = initTeams(newCount, slotsCount.value);
+};
+
+/** ドラフトスロット数変更時 */
+const toggleSlotsCount = () => {
+    const newSlotsCount = slotsCount.value === 4 ? 5 : 4;
+    slotsCount.value = newSlotsCount;
+    // Keep as many members as possible
+    teams.value = teams.value.map((team) => {
+        const members = [...(team.members || [])];
+        while (members.length < newSlotsCount) {
+            members.push(null);
+        }
+        return {
+            ...team,
+            members: members.slice(0, newSlotsCount),
+        };
+    });
 };
 
 /** リセット時 */
 const resetDraft = () => {
-    teams.value = initTeams(teamCount.value);
+    teams.value = initTeams(teamCount.value, slotsCount.value);
 };
 
 /** プール表示/非表示切り替え時 */
@@ -407,23 +439,65 @@ const togglePool = () => {
     &.teams-6 {
         flex-wrap: nowrap;
         gap: 20px;
-        height: 660px;
+
+        &.slots-4 {
+            height: 660px;
+            .leader-frame {
+                width: 135px;
+                height: 135px;
+                margin: 30px;
+            }
+            .draft-slot {
+                width: 195px;
+                height: 105px;
+            }
+        }
+
+        &.slots-5 {
+            height: 720px;
+            .leader-frame {
+                width: 135px;
+                height: 135px;
+                margin: 15px;
+            }
+            .draft-slot {
+                width: 195px;
+                height: 95px;
+            }
+        }
     }
 
     &.teams-8 {
         flex-wrap: nowrap;
         gap: 10px;
-        height: 510px;
 
-        .team-block {
-            .leader-frame {
-                width: 165px;
-                height: 165px;
+        &.slots-4 {
+            height: 540px;
+            .team-block {
+                .leader-frame {
+                    width: 165px;
+                    height: 165px;
+                    margin: 20px;
+                }
+                .draft-slot {
+                    width: 150px;
+                    height: 78px;
+                }
             }
+        }
 
-            .draft-slot {
-                width: 150px;
-                height: 78px;
+        &.slots-5 {
+            height: 620px;
+            .team-block {
+                .leader-frame {
+                    width: 150px;
+                    height: 150px;
+                    margin: 15px;
+                }
+                .draft-slot {
+                    width: 150px;
+                    height: 75px;
+                }
             }
         }
     }
@@ -437,8 +511,6 @@ const togglePool = () => {
 }
 
 .leader-frame {
-    width: 135px;
-    height: 135px;
     border: 3px dashed rgba(255, 255, 255, 0.4);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
@@ -446,7 +518,6 @@ const togglePool = () => {
     align-items: center;
     justify-content: center;
     position: relative;
-    margin: 30px;
     box-sizing: content-box;
 
     .leader-label {
@@ -465,8 +536,6 @@ const togglePool = () => {
 }
 
 .draft-slot {
-    width: 195px;
-    height: 105px;
     background: rgba(0, 0, 0, 0.4);
     border: 3px solid rgba(255, 255, 255, 0.15);
     border-radius: 9px;
@@ -542,26 +611,48 @@ const togglePool = () => {
     transition: all 0.3s ease;
 
     &.teams-6 {
-        bottom: 15px;
-        height: 300px;
-
-        .pool-scroll {
-            grid-template-columns: repeat(12, 135px);
-            grid-template-rows: repeat(2, 135px);
-            justify-content: center;
-            align-content: center;
+        &.slots-4 {
+            bottom: 15px;
+            height: 300px;
+            .pool-scroll {
+                grid-template-columns: repeat(12, 135px);
+                grid-template-rows: repeat(2, 135px);
+                justify-content: center;
+                align-content: center;
+            }
+        }
+        &.slots-5 {
+            bottom: 15px;
+            height: 260px;
+            .pool-scroll {
+                grid-template-columns: repeat(15, 115px);
+                grid-template-rows: repeat(2, 115px);
+                justify-content: center;
+                align-content: center;
+            }
         }
     }
 
     &.teams-8 {
-        bottom: 15px;
-        height: 420px;
-
-        .pool-scroll {
-            grid-template-columns: repeat(16, 111px);
-            grid-template-rows: repeat(2, 111px);
-            justify-content: center;
-            align-content: center;
+        &.slots-4 {
+            bottom: 15px;
+            height: 420px;
+            .pool-scroll {
+                grid-template-columns: repeat(16, 111px);
+                grid-template-rows: repeat(2, 111px);
+                justify-content: center;
+                align-content: center;
+            }
+        }
+        &.slots-5 {
+            bottom: 15px;
+            height: 340px;
+            .pool-scroll {
+                grid-template-columns: repeat(20, 88px);
+                grid-template-rows: repeat(2, 88px);
+                justify-content: center;
+                align-content: center;
+            }
         }
     }
 
